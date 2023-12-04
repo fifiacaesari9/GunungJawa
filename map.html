@@ -4,9 +4,18 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Peta Persebaran Pendakian gunung di Pulau Jawa</title>
+	<title>Ini Peta Interaktif</title>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+	<!-- <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.css" /> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+		integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css"
+		integrity="sha512-P9vJUXK+LyvAzj8otTOKzdfF1F3UYVl13+F8Fof8/2QNb8Twd6Vb+VD52I7+87tex9UXxnzPgWA3rH96RExA7A=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 	<style>
 		html,
 		body,
@@ -15,22 +24,53 @@
 			width: 100%;
 			margin: 0;
 		}
+		/* Style for the image in the popup */
+		.popup-image {
+	            max-width: 100%; /* Set the maximum width for the image */
+	            max-height: 200px; /* Set the maximum height for the image */
+	            display: block;
+	            margin: 0 auto;
+	        }
 	</style>
 </head>
 
 <body>
 	<div id="map"></div>
+
+	<div id="basemap-control" class="leaflet-top leaflet-right"></div>
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<script src="https://unpkg.com/leaflet-providers@1.12.0/leaflet-providers.js"></script>
+	<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+	<!-- <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script> -->
+	<!-- Search JavaScript Library -->
+	<script src="https://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.js"></script>
+	<script src="https://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+
 	<script>
 		// yogyakarta
-		var map = L.map('map').setView([-4.914302647563465, 138.43095786039243], 15);
+		var map = L.map('map').setView([-4.914302647563465, 138.43095786039243], 6);
 
-		// basemap
-		var basemap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			maxZoom: 18
-		}).addTo(map);
+		// basemaps
+		var openStreetMap = L.tileLayer.provider('OpenStreetMap.Mapnik');
+		var satelliteMap = L.tileLayer.provider('Esri.WorldImagery');
+		var darkMap = L.tileLayer.provider('CartoDB.DarkMatter');
+		// Add basemaps to layers control
+		var basemaps = {
+			"OpenStreetMap": openStreetMap,
+			"Satellite": satelliteMap,
+			"Dark": darkMap
+		};
+
+		// Add default basemap to the map
+		openStreetMap.addTo(map);
+
+		// Control layers
+		L.control.layers(basemaps, null, { position: 'topright' }).addTo(map);
+
+		// Locate control
+		L.control.locate().addTo(map);
 
 		// Export Button
 		var showExport = '<button onclick="loadlayer()" title="Refresh map" class="">reload</button>';
@@ -42,31 +82,76 @@
 			return this._div;
 		};
 		showExportButton.addTo(map);
+		// Inisialisasi routing control
+		// var control = L.Routing.control({
+		// 	routeWhileDragging: true,
+		// 	waypoints: [
+		// 		L.latLng(-7.797068, 110.370529)  // Koordinat awal (Yogyakarta)
+		// 	]
+		// });
+		// control.addTo(map);
+
+
+
 
 		function loadlayer() {
 			var point = L.geoJson(null, {
 				onEachFeature: function (feature, layer) {
-					var popupContent = 
-					"<img src='" + feature.properties.gambar+ "'>" + 
+					var popupContent = "<img class='popup-image' src='" + feature.properties.gambar + "'>" +
 					"<h4>" + feature.properties.nama + "</h4>" +
 					"<p>" + feature.properties.puncaktertinggi + "</p>" +
 						"<p>" + feature.properties.deskripsi + "</p>" ;
 
-					layer.on({
-						click: function (e) {
-							point.bindPopup(popupContent);
-						},
+
+					layer.bindPopup(popupContent);
+
+					layer.on('click', function (e) {
+						var destination = e.latlng;
+						control.spliceWaypoints(control.getWaypoints().length - 1, 1, destination);
 					});
 				},
 			});
+
 			$.getJSON("https://script.google.com/macros/s/AKfycbywHb64sfQLCHXF7nyYkkPEWmQOoSe8uSuRxTHUkajBtYb2gCPdELWMAW8u0MC62NV-pg/exec", function (data) {
 				point.addData(data);
 				map.addLayer(point);
 				map.fitBounds(point.getBounds());
 			});
+
+			// // Tambahkan event listener untuk tombol routing di dalam popup
+			// $(document).on('click', '.routing-btn', function () {
+			// 	var destination = point.getBounds().getCenter();
+			// 	control.spliceWaypoints(control.getWaypoints().length - 1, 1, destination);
+			// });
 		}
+		//buat style area admin desa dan munculin desanya
+		var areaStyle = {
+			"color": "#CD5C08",
+			"weight": 2,
+			"fillOpacity": 0.7,
+			"opacity": 0.45
+		};
+
+
+		var areaAlu = new L.GeoJSON.AJAX(["data/PAPUA.geojson"], {
+			onEachFeature: function (feature, layer) {
+				var popupText = "Kecamatan: " + feature.properties.NAMOBJ;
+				if (feature.properties.WADMKK) {
+					popupText += "<br/>Kabupaten: " + feature.properties.WADMKK;
+				}
+				if (feature.properties.jumlahALL) {
+					popupText += "<a href='halamanalufe.php'><br/>Jumlah Sekolah: 12</a>" //+ feature.properties.jumlahALL;
+				}
+				layer.bindPopup(popupText);
+			}, style: areaStyle
+		}).addTo(map);
+
 
 		loadlayer();
+
+
+
 	</script>
 </body>
+
 </html>
