@@ -44,9 +44,27 @@
 								<div class="row">
 									<div class="col-sm">
 										<div class="form-group">
+											<label for="puncaktertinggi"><strong>Puncak Tertinggi</strong></label>
+											<textarea type="text" class="form-control text-primary" id="puncaktertinggi" name="puncaktertinggi"
+												placeholder="puncaktertinggi" rows="3"></textarea>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm">
+										<div class="form-group">
 											<label for="deskripsi"><strong>Deskripsi</strong></label>
 											<textarea type="text" class="form-control text-primary" id="deskripsi" name="deskripsi"
 												placeholder="Deskripsi" rows="3"></textarea>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm">
+										<div class="form-group">
+											<label for="gambar"><strong>Gambar</strong></label>
+											<textarea type="URL" class="form-control text-primary" id="gambar" name="gambar"
+												placeholder="gambar" rows="3"></textarea>
 										</div>
 									</div>
 								</div>
@@ -204,7 +222,7 @@
 			.addTo(map);
 
 		// Submit to google spreadsheet
-		const scriptURL = 'https://script.google.com/macros/s/AKfycbyZVPC4ddB0TyEABVZ-KwnQ_IMNC7sUYJl76K5as9dPtpOHoW-OvU3bGMbjEbleN2VWvA/exec';
+		const scriptURL = 'https://script.google.com/macros/s/AKfycbxVmH7LKtkA-kNeqrBXZ-Xkl9l-fX_LFe9FmC6zzIMCpdZdVm9yedwrrr6kpAyih5U0Qg/exec';
 		const form = document.forms['submit-to-google-sheet'];
 		const btnSimpan = document.querySelector('.btn-simpan');
 		const btnLoading = document.querySelector('.btn-loading');

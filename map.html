@@ -25,7 +25,7 @@
 		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 	<script>
 		// yogyakarta
-		var map = L.map('map').setView([-7.797068, 110.370529], 13);
+		var map = L.map('map').setView([-4.914302647563465, 138.43095786039243], 15);
 
 		// basemap
 		var basemap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -46,8 +46,12 @@
 		function loadlayer() {
 			var point = L.geoJson(null, {
 				onEachFeature: function (feature, layer) {
-					var popupContent = "<h4>" + feature.properties.nama + "</h4>" +
-						"<p>" + feature.properties.deskripsi + "</p>";
+					var popupContent = 
+					"<img src='" + feature.properties.gambar+ "'>" + 
+					"<h4>" + feature.properties.nama + "</h4>" +
+					"<p>" + feature.properties.puncaktertinggi + "</p>" +
+						"<p>" + feature.properties.deskripsi + "</p>" ;
+
 					layer.on({
 						click: function (e) {
 							point.bindPopup(popupContent);
@@ -55,7 +59,7 @@
 					});
 				},
 			});
-			$.getJSON("https://script.google.com/macros/s/AKfycbxVzY6fI2_dIO8hho4heB7SzQbqWW4Ixjbdz_r8KKU4s2nD_8xsUWNOGggk-A8l_ZxrtQ/exec", function (data) {
+			$.getJSON("https://script.google.com/macros/s/AKfycbywHb64sfQLCHXF7nyYkkPEWmQOoSe8uSuRxTHUkajBtYb2gCPdELWMAW8u0MC62NV-pg/exec", function (data) {
 				point.addData(data);
 				map.addLayer(point);
 				map.fitBounds(point.getBounds());
